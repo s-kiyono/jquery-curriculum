@@ -56,6 +56,20 @@
       // .slideUp() 要素がスライドしながら非表示されます。
       // .children() 要素の子要素を取得します。
       // .stop() 現在動作中のアニメーション処理を全て中止します。
+      $(function() {
+        $('.menu__list > li').hover(slideDown,slideUp);
+        
+        function slideDown(){
+        var index = $(this).index();
+        $('.menu__list__childList').eq(index).stop(true).slideDown();  
+        }
+
+        function slideUp( ){
+        $('.menu__list__childList').stop(true).slideUp();        
+        }     
+    
+      });
+
       // [確認してほしい挙動]
       // ・ホバー時にリストがスライドしながら表示されること
       // ・連続で何回もホバーした時、手を止めているのにリストがスライドし続けないか

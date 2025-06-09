@@ -16,6 +16,121 @@
   <script src="../../common/js/jquery.js"></script>
   <script>
     // 回答はここに書いてね
-  </script>
+$(function() {
+
+  //ランダムな数字用の関数
+var min = 0
+var max = 1
+function randomNum( min, max ) {
+  var random = Math.floor( Math.random() * (max + 1 - min)) + min;
+  return random;
+};
+
+//逃げる・戻るをクリックした時
+$(document).on('click','[data-js="reset"]',reset);
+
+function reset(){ 
+	$('.addhtml').remove();
+	$('#pokemon_search').show();
+}
+
+//ポケモンを探すをクリックした時
+$('#pokemon_search').click(search);
+
+function search( ){
+  var min = 1
+  var max = 151
+  var searchurl ='https://pokeapi.co/api/v2/pokemon/'+randomNum( min, max );
+
+  var date_name = '名前が分かるurl'
+  var pokemonimg = 'ポケモンの画像のurl' 
+  var pokemonname = 'ポケモンの名前' 
+
+  //date_nameとpokemonimgの取得
+  var getdate = $.ajax({ 
+     url: searchurl,
+     method: 'GET'
+     }).done(function(res) {   
+     date_name = res.species.url
+     pokemonimg = res.sprites.front_default 
+    }).fail(function(err) { 
+     reset( );
+     console.log('データが取得できていない！');
+  });
+
+  //date_nameからpokemonnameの取得  
+  $.when(getdate).done(function(res) {
+
+    $.ajax({ 
+      url: date_name,
+      method: 'GET'
+      }).done(function(res) {
+      pokemonname = res.names[0].name
+      let encountHtml =
+      `
+      <p class="name">${pokemonname}</p>
+      <div>
+        <img class="img" src="${pokemonimg}" alt="">
+      </div>
+      <div>
+        <button class="btn" id="catch">捕まえる</button>
+        <button class="btn" data-js="reset">逃げる</button>
+      </div>
+      `
+      $('#wrapper').prepend('<div class = addhtml>'+encountHtml+'</dit>');
+      $('#pokemon_search').hide();
+      }).fail(function(err) { 
+      reset( );
+      console.log('名前が取得できていない！');
+    });
+  }).fail(function(err) { 
+    reset( );
+    console.log('通信ができていない！');
+  });
+}
+ 
+//捕まえるをクリックした時
+$(document).on('click','#catch',pokemoncatch)
+
+function pokemoncatch(){ 
+  $('.addhtml').remove()
+  var pokemonball = 'ボールの画像'
+  if(randomNum( min, max ) === 0){
+    console.log('成功！');
+    //ボールの画像を取得
+    $.ajax({ 
+      url: 'https://pokeapi.co/api/v2/item/4',
+      method: 'GET'
+      }).done(function(res) { 
+      pokemonball = res.sprites.default 
+      // 「捕まえる」成功時の画面表示
+      let doneHtml =
+      `
+        <p class="name">ゲットしました</p>
+        <div>
+          <img class="img" src="${pokemonball}" alt="">
+        </div>
+        <button class="btn" data-js="reset">戻る</button>
+      `    
+      $('#wrapper').prepend('<div class = addhtml>'+doneHtml+'</dit>');
+
+      }).fail(function(err) {
+      console.log('ボールが無かった…');
+    });
+
+  } else{
+    console.log('失敗！');
+    // 「捕まえる」失敗時の画面表示
+    let failHtml =
+    `
+      <p class="text">逃げられてしまった...</p>
+      <button class="btn mt" data-js="reset">戻る</button>
+    `
+    $('#wrapper').prepend('<div class = addhtml>'+failHtml+'</dit>');
+  };   
+};
+
+});    
+</script>
 </body>
 </html>
